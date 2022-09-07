@@ -52,19 +52,32 @@ class Bank:
 
         if new_acc_no not in self.accounts_dic:
             self.accounts_dic[new_acc_no] = new_account
-        else:
+            return new_acc_no
 
+        else:
             raise IndexError('Account already exists')
 
-    def get_balance(self):
-        account_number = int(input('Please enter account number ').strip())
-        account = self.accounts_dic[account_number]
-        account_password = account.password
-        user_password = int(input('Please enter your password ').strip())
-        if account_password == user_password:
-            return account.balance
+    def login(self):
+        card_number = int(input("Enter your card number:\n").strip())
+        pin_number = int(input("Enter your PIN:\n").strip())
+
+        if card_number not in self.accounts_dic:
+            raise KeyError(f'Wrong card number or PIN!')
+
         else:
-            raise KeyError('Wrong Password for account')
+            account_for_login = self.accounts_dic[card_number]
+
+        if pin_number != account_for_login.password:
+            raise KeyError(f'Wrong card number or PIN!')
+
+        else:
+            print('You have successfully logged in!')
+            return card_number
+
+    def get_balance(self, account_number):
+        account_number = int(account_number)
+        account = self.accounts_dic[account_number]
+        return account.balance
 
     def set_balance(self):
         account_number = int(input('Please enter account number ').strip())
@@ -72,12 +85,64 @@ class Bank:
         account = self.accounts_dic[account_number]
         account.balance = value
 
-    def get_password(self):
-        account_number = int(input('Please enter account number ').strip())
+    def get_password(self, account_number):
         account = self.accounts_dic[account_number]
         return account.password
 
-    def set_password(self):
-        account_number = int(input('Please enter account number ').strip())
+    def set_password(self, account_number):
         account = self.accounts_dic[account_number]
         account.set_password()
+
+
+my_bank = Bank()
+
+running_flag = True
+
+while running_flag:
+
+    print("1. Create an account")
+    print("2. Log into account")
+    print("0. Exit")
+
+    user_input = int(input().strip()[0])
+
+    if user_input == 1:
+        new_account_number = int(my_bank.create_account())
+        my_bank.set_password(new_account_number)
+        new_password = my_bank.get_password(new_account_number)
+        print("Your card has been created")
+        print("Your card number:")
+        print(new_account_number)
+        print("Your card PIN:")
+        print(new_password)
+
+    if user_input == 2:
+
+        try:
+            account = my_bank.login()
+        except KeyError as error:
+            print('Wrong card number or PIN!')
+            continue
+
+        while True:
+            print('1. Balance')
+            print('2. Log out')
+            print('0. Exit')
+
+            user_input = int(input().strip()[0])
+
+            if user_input == 0:
+                running_flag = False
+                break
+
+            if user_input == 2:
+                print('You have successfully logged out!')
+                break
+
+            if user_input == 1:
+                print(f'Balance: {my_bank.get_balance(account)}')
+                continue
+
+    if user_input == 0:
+        print('Bye!')
+        break
