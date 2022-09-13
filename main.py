@@ -32,21 +32,105 @@ class Account:
         return new_password
 
 
-class Bank:
+class Bank():
 
     def __init__(self):
         self.accounts_dic = {}
 
     def create_account(self):
-        inn = 400_000
 
-        # range_start and _end to assure a 9-digit account number
-        range_start = 10 ** (9 - 1)
-        range_end = (10 ** 9) - 1
+        # Creation of credit_card_number in accordance with luhn algorithm:
+
+        # Creation of a 14-digit card number without checksum
+
+        range_start = 10 ** (14 - 1)
+        range_end = (10 ** 14) - 1
         customer_account_number = randint(range_start, range_end)
 
-        checksum = randint(0, 9)
-        new_acc_no = int(f'{inn}{customer_account_number}{checksum}')
+        inn = 4
+
+        # Creation of 15-digit number with 4 as first digit
+
+        new_acc_no = int(f'{inn}{customer_account_number}')
+
+        # Cast number to list for further processing
+
+        # This is the part of the credit card number without control digit:
+        # It will be used for creating the credit card number with the
+        # control digit when the control digit has been calculated according
+        # to luhn algorithm
+
+        number_as_list = [int(element) for element in str(new_acc_no)]
+        print(number_as_list)
+
+        # Separation of number as list for usage in luhn-algorithm
+
+        numbers_not_to_process = number_as_list[::2]
+        numbers_to_process = number_as_list[1::2]
+
+        # Multiplying every second digit of number by two (fist stage)
+
+        processed_numbers_stage_one = [
+            element * 2 for element in numbers_to_process
+        ]
+
+        # If doubling a number results in a two-digit number ->
+        # add the digits of the product to get a single digit number
+
+        processed_numbers_stage_two = [1 + (element - 10) if element > 9
+                                       else element for element in processed_numbers_stage_one
+                                       ]
+
+        # Combining numbers_not_to_process with processed_numbers (stage 2)
+
+        luhn_numbers_stage_one = list(zip(
+            numbers_not_to_process, processed_numbers_stage_two))
+
+        # flatten luhn_numbers_stage_one
+
+        luhn_numbers_stage_two = [element for sub_element in
+                                  luhn_numbers_stage_one for element in sub_element]
+
+        # add last digit of numbers_as_list (missing because of zip-function)
+
+        luhn_numbers_stage_two.append(number_as_list[-1])
+
+        # Calculate control digit depending on sum of digits in list
+
+        control_digit = sum(luhn_numbers_stage_two) % 10
+
+        if control_digit == 0:
+            luhn_numbers_stage_two.append(0)
+
+        else:
+            luhn_numbers_stage_two.append(10 - control_digit)
+
+        # debug: Show if number % 10 == 0
+
+        print(luhn_numbers_stage_two)
+        print(sum(luhn_numbers_stage_two) % 10 == 0)
+
+        # Separate control_digit in order to add it to the credit card number
+        control_digit_for_credit_card_number = luhn_numbers_stage_two.pop()
+
+        # Add control_number to numbers_as_list in oder to create
+        # a credit card number with control digit
+
+        number_as_list.append(control_digit_for_credit_card_number)
+
+        # debug print credit_card_number with control_digit
+
+        print(number_as_list)
+
+        # Cast list to credit card number as int
+
+        pre_processed_number = [str(element) for element in number_as_list]
+
+        credit_card_number = int(''.join(pre_processed_number))
+
+        # Assign credit_card_number according to luhn algorithm to account number
+
+        new_acc_no = credit_card_number
 
         new_account = Account()
 
@@ -59,7 +143,7 @@ class Bank:
 
     def login(self):
         card_number = int(input("Enter your card number:\n").strip())
-        pin_number = int(input("Enter your PIN:\n").strip())
+        pin_number = int(input(("Enter your PIN:\n").strip()))
 
         if card_number not in self.accounts_dic:
             raise KeyError(f'Wrong card number or PIN!')
