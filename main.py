@@ -61,7 +61,6 @@ class Bank():
         # to luhn algorithm
 
         number_as_list = [int(element) for element in str(new_acc_no)]
-        print(number_as_list)
 
         # Separation of number as list for usage in luhn-algorithm
 
@@ -105,11 +104,6 @@ class Bank():
         else:
             luhn_numbers_stage_two.append(10 - control_digit)
 
-        # debug: Show if number % 10 == 0
-
-        print(luhn_numbers_stage_two)
-        print(sum(luhn_numbers_stage_two) % 10 == 0)
-
         # Separate control_digit in order to add it to the credit card number
         control_digit_for_credit_card_number = luhn_numbers_stage_two.pop()
 
@@ -117,10 +111,6 @@ class Bank():
         # a credit card number with control digit
 
         number_as_list.append(control_digit_for_credit_card_number)
-
-        # debug print credit_card_number with control_digit
-
-        print(number_as_list)
 
         # Cast list to credit card number as int
 
