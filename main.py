@@ -41,15 +41,15 @@ class Bank():
 
         # Creation of credit_card_number in accordance with luhn algorithm:
 
-        # Creation of a 14-digit card number without checksum
+        # Creation of a 9-digit card number without checksum
 
-        range_start = 10 ** (14 - 1)
-        range_end = (10 ** 14) - 1
+        range_start = 10 ** (9 - 1)
+        range_end = (10 ** 9) - 1
         customer_account_number = randint(range_start, range_end)
 
-        inn = 4
+        inn = 400000
 
-        # Creation of 15-digit number with 4 as first digit
+        # Creation of 15-digit number with 400000 as first digits
 
         new_acc_no = int(f'{inn}{customer_account_number}')
 
