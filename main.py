@@ -32,7 +32,7 @@ class Account:
         return new_password
 
 
-class Bank():
+class Bank:
 
     def __init__(self):
         self.accounts_dic = {}
@@ -55,68 +55,42 @@ class Bank():
 
         # Cast number to list for further processing
 
-        # This is the part of the credit card number without control digit:
-        # It will be used for creating the credit card number with the
-        # control digit when the control digit has been calculated according
-        # to luhn algorithm
-
         number_as_list = [int(element) for element in str(new_acc_no)]
 
-        # Separation of number as list for usage in luhn-algorithm
-
-        numbers_not_to_process = number_as_list[::2]
-        numbers_to_process = number_as_list[1::2]
-
         # Multiplying every second digit of number by two (fist stage)
+        # starting from right side of list assuming a 16-digit number
 
-        processed_numbers_stage_one = [
-            element * 2 for element in numbers_to_process
-        ]
+        luhn_stage_one = [element * 2 if counter % 2 == 0 else
+                          element for counter, element in enumerate(number_as_list)]
 
         # If doubling a number results in a two-digit number ->
         # add the digits of the product to get a single digit number
+        # -> element - 9 gets the same result
 
-        processed_numbers_stage_two = [1 + (element - 10) if element > 9
-                                       else element for element in processed_numbers_stage_one
-                                       ]
-
-        # Combining numbers_not_to_process with processed_numbers (stage 2)
-
-        luhn_numbers_stage_one = list(zip(
-            numbers_not_to_process, processed_numbers_stage_two))
-
-        # flatten luhn_numbers_stage_one
-
-        luhn_numbers_stage_two = [element for sub_element in
-                                  luhn_numbers_stage_one for element in sub_element]
-
-        # add last digit of numbers_as_list (missing because of zip-function)
-
-        luhn_numbers_stage_two.append(number_as_list[-1])
+        luhn_stage_two = [element - 9 if element > 9 else element
+                          for element in luhn_stage_one]
 
         # Calculate control digit depending on sum of digits in list
 
-        control_digit = sum(luhn_numbers_stage_two) % 10
+        sum_stage_two = sum(luhn_stage_two)
 
-        if control_digit == 0:
-            luhn_numbers_stage_two.append(0)
+        check_digit = (10 - sum_stage_two % 10)
 
-        else:
-            luhn_numbers_stage_two.append(10 - control_digit)
+        # Add control digit to the credit card number
 
-        # Separate control_digit in order to add it to the credit card number
-        control_digit_for_credit_card_number = luhn_numbers_stage_two.pop()
+        number_as_list.append(check_digit)
 
-        # Add control_number to numbers_as_list in oder to create
-        # a credit card number with control digit
+        # if control_digit == 0 it has to be replaced with 9
 
-        number_as_list.append(control_digit_for_credit_card_number)
+        if number_as_list[-1] == 0:
+            number_as_list.pop()
+            number_as_list.append(9)
 
         # Cast list to credit card number as int
 
-        pre_processed_number = [str(element) for element in number_as_list]
+        credit_card_number_lst = [str(element) for element in number_as_list]
 
-        credit_card_number = int(''.join(pre_processed_number))
+        credit_card_number = int(''.join(credit_card_number_lst))
 
         # Assign credit_card_number according to luhn algorithm to account number
 
@@ -133,7 +107,7 @@ class Bank():
 
     def login(self):
         card_number = int(input("Enter your card number:\n").strip())
-        pin_number = int(input(("Enter your PIN:\n").strip()))
+        pin_number = int(input("Enter your PIN:\n").strip())
 
         if card_number not in self.accounts_dic:
             raise KeyError(f'Wrong card number or PIN!')
