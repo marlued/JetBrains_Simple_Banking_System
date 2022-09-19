@@ -39,62 +39,26 @@ class Bank:
 
     def create_account(self):
 
-        # Creation of credit_card_number in accordance with luhn algorithm:
+        first_digits = [4, 0, 0, 0, 0, 0]
+        base_number_as_lst = list(range(9))
+        number_as_list = first_digits + [randint(0, 9) for element
+                                         in base_number_as_lst]
+        stage_one = [element * 2 if counter % 2 == 0 else element
+                     for counter, element in enumerate(number_as_list[::-1])][::-1]
+        stage_two = [element - 9 if element > 9 else element for element in stage_one]
+        sum_stage_two = sum(stage_two)
 
-        # Creation of a 9-digit card number without checksum
+        if sum_stage_two % 10 == 0:
+            number_as_list.append(0)
 
-        range_start = 10 ** (9 - 1)
-        range_end = (10 ** 9) - 1
-        customer_account_number = randint(range_start, range_end)
+        else:
+            number_as_list.append(10 - (sum_stage_two % 10))
 
-        inn = 400000
+        number = int(''.join([str(element) for element in number_as_list]))
 
-        # Creation of 15-digit number with 400000 as first digits
+        # Assign number according to luhn algorithm to account number
 
-        new_acc_no = int(f'{inn}{customer_account_number}')
-
-        # Cast number to list for further processing
-
-        number_as_list = [int(element) for element in str(new_acc_no)]
-
-        # Multiplying every second digit of number by two (fist stage)
-        # starting from right side of list assuming a 16-digit number
-
-        luhn_stage_one = [element * 2 if counter % 2 == 0 else
-                          element for counter, element in enumerate(number_as_list)]
-
-        # If doubling a number results in a two-digit number ->
-        # add the digits of the product to get a single digit number
-        # -> element - 9 gets the same result
-
-        luhn_stage_two = [element - 9 if element > 9 else element
-                          for element in luhn_stage_one]
-
-        # Calculate control digit depending on sum of digits in list
-
-        sum_stage_two = sum(luhn_stage_two)
-
-        check_digit = (10 - sum_stage_two % 10)
-
-        # Add control digit to the credit card number
-
-        number_as_list.append(check_digit)
-
-        # if control_digit == 0 it has to be replaced with 9
-
-        if number_as_list[-1] == 0:
-            number_as_list.pop()
-            number_as_list.append(9)
-
-        # Cast list to credit card number as int
-
-        credit_card_number_lst = [str(element) for element in number_as_list]
-
-        credit_card_number = int(''.join(credit_card_number_lst))
-
-        # Assign credit_card_number according to luhn algorithm to account number
-
-        new_acc_no = credit_card_number
+        new_acc_no = number
 
         new_account = Account()
 
